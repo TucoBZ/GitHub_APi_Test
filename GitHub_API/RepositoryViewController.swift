@@ -1,5 +1,5 @@
 //
-//  FirstViewController.swift
+//  RepositoryViewController.swift
 //  GitHub_API
 //
 //  Created by Túlio Bazan da Silva on 11/01/16.
@@ -8,7 +8,7 @@
 
 import UIKit
 
-class FirstViewController: UIViewController {
+class RepositoryViewController: UIViewController {
 
     override func viewDidLoad() {
         super.viewDidLoad()

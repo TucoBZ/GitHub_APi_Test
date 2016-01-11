@@ -1,10 +1,29 @@
 PODS:
   - Alamofire (3.1.4)
+  - FLAnimatedImage (1.0.10)
+  - MBProgressHUD (0.9.2)
+  - PINCache (2.1.2)
+  - PINRemoteImage (1.2.2):
+    - PINRemoteImage/FLAnimatedImage (= 1.2.2)
+  - PINRemoteImage/Core (1.2.2):
+    - PINCache (>= 2.1)
+  - PINRemoteImage/FLAnimatedImage (1.2.2):
+    - FLAnimatedImage (>= 1.0)
+    - PINRemoteImage/Core
+  - SwiftyJSON (2.3.2)
 
 DEPENDENCIES:
   - Alamofire (~> 3.0)
+  - MBProgressHUD (~> 0.9.2)
+  - PINRemoteImage
+  - SwiftyJSON
 
 SPEC CHECKSUMS:
   Alamofire: fbc829692f351fa1d8a31dd75fd7f7f56fea31fb
+  FLAnimatedImage: e16a1e1cef08e4c509b47e4acbe3923f65c16135
+  MBProgressHUD: 1569cf7ace17a8bac47aabfbb8580a49690386d1
+  PINCache: 9e70271f1bdd60c0465b7208adcc4b6acc1fc376
+  PINRemoteImage: 9f6f484bbceee15e2df5aee0beeac2e261e4ac81
+  SwiftyJSON: 04ccea08915aa0109039157c7974cf0298da292a
 
 COCOAPODS: 0.38.2
