@@ -16,6 +16,7 @@ protocol ConnectionDelegate {
     func updatedUsers(users: Array<User>)
     func updatedSearchUsers(users: Array<User>)
     func updatedRepositories(repositories: Array<Repository>)
+    func updatedSearchRepositories(repositories: Array<Repository>)
 }
 
 
@@ -123,6 +124,25 @@ class APIConnection{
             }
             break
             
+        case "search/repositories":
+            print(value)
+            let items = (value as! Dictionary<String,AnyObject>)["items"]
+            for obj in items as! Array<AnyObject>{
+                let json = JSON(obj)
+                //print("JSON: \(json)")
+                let repo = Repository(json: json)
+                self.repositories?.append(repo)
+            }
+            
+            //Sort Array by ID
+            self.repositories? = (self.repositories?.sort({ $0.name < $1.name}))!
+            
+            if self.delegate != nil {
+                self.delegate?.updatedSearchRepositories(self.repositories!)
+            }
+
+            break
+            
         
         default:
             print(value)
@@ -136,9 +156,9 @@ class APIConnection{
         self.updateByKey("users",param:["since" : int])
     }
     
-    func getRepositories(){
+    func getRepositories(int: Int){
         repositories = []
-        self.updateByKey("repositories",param:["":""])
+        self.updateByKey("repositories",param:["since" : int])
     }
     
     func getRateLimit(){
@@ -149,6 +169,12 @@ class APIConnection{
         users = []
         self.updateByKey("search/users",param:["q":name])
     }
+    
+    func searchForRepositories(name: String){
+        users = []
+        self.updateByKey("search/repositories",param:["q":name])
+    }
+    
     private func showLoadingHUD() {
         let hud = MBProgressHUD.showHUDAddedTo(self.view, animated: true)
         hud.labelText = "Loading..."

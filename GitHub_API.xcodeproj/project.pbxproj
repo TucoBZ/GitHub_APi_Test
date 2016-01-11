@@ -114,11 +114,10 @@
 		654A18201C43D696009D2658 /* GitHub_API */ = {
 			isa = PBXGroup;
 			children = (
+				654A185B1C446250009D2658 /* Controller */,
+				654A185A1C446249009D2658 /* View */,
 				654A18511C43DF3A009D2658 /* Model */,
 				654A18211C43D696009D2658 /* AppDelegate.swift */,
-				654A18231C43D696009D2658 /* UserViewController.swift */,
-				654A18251C43D696009D2658 /* RepositoryViewController.swift */,
-				654A18271C43D696009D2658 /* Main.storyboard */,
 				654A182A1C43D696009D2658 /* Assets.xcassets */,
 				654A182C1C43D696009D2658 /* LaunchScreen.storyboard */,
 				654A182F1C43D696009D2658 /* Info.plist */,
@@ -153,6 +152,23 @@
 				654A18581C442F39009D2658 /* ExtensionsUTIL.swift */,
 			);
 			name = Model;
+			sourceTree = "<group>";
+		};
+		654A185A1C446249009D2658 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				654A18271C43D696009D2658 /* Main.storyboard */,
+			);
+			name = View;
+			sourceTree = "<group>";
+		};
+		654A185B1C446250009D2658 /* Controller */ = {
+			isa = PBXGroup;
+			children = (
+				654A18231C43D696009D2658 /* UserViewController.swift */,
+				654A18251C43D696009D2658 /* RepositoryViewController.swift */,
+			);
+			name = Controller;
 			sourceTree = "<group>";
 		};
 		74F33CF10D1261D0B0E1156D /* Pods */ = {

@@ -16,7 +16,7 @@ class UserViewController: UIViewController, ConnectionDelegate, UITableViewDeleg
     var users : Array<User>?
     var filteredArray : Array<User>?
     
-    var connection = APIConnection.sharedInstance
+    var connection = APIConnection.init()
     var searchController : UISearchController!
     var shouldShowSearchResults = false
     
@@ -38,7 +38,7 @@ class UserViewController: UIViewController, ConnectionDelegate, UITableViewDeleg
         if shouldShowSearchResults {
             
             //User Name
-            cell.textLabel?.text = "\(self.filteredArray![indexPath.row].login!) - ID: \(self.filteredArray![indexPath.row].id!)"
+            cell.textLabel?.text = "\(self.filteredArray![indexPath.row].login!)"
             
             //Image Pin
             let imageURL = NSURL(string: self.filteredArray![indexPath.row].avatar_url!)
@@ -83,7 +83,6 @@ class UserViewController: UIViewController, ConnectionDelegate, UITableViewDeleg
     func searchBarTextDidBeginEditing(searchBar: UISearchBar) {
         shouldShowSearchResults = false
         self.filteredArray = []
-        //tableView.reloadData()
     }
     
     
@@ -96,19 +95,15 @@ class UserViewController: UIViewController, ConnectionDelegate, UITableViewDeleg
     func searchBarSearchButtonClicked(searchBar: UISearchBar) {
         if !shouldShowSearchResults {
             shouldShowSearchResults = true
-            tableView.reloadData()
-            self.updateSearchResultsForSearchController(searchController)
+            //tableView.reloadData()
+            self.connection.searchForUser(searchBar.text!)
         }
         
         searchController.searchBar.resignFirstResponder()
     }
     
     func updateSearchResultsForSearchController(searchController: UISearchController) {
-        let searchString = searchController.searchBar.text
-        
-        if searchString != "" && shouldShowSearchResults{
-            self.connection.searchForUser(searchString!)
-        }
+       
         
     }
     
@@ -122,10 +117,11 @@ class UserViewController: UIViewController, ConnectionDelegate, UITableViewDeleg
     func updatedRepositories(repositories: Array<Repository>) {}
 
     func updatedSearchUsers(users: Array<User>) {
-        self.filteredArray = []
-        self.filteredArray?.appendAll(users)
+        self.filteredArray = users
         self.tableView?.reloadData()
     }
+    
+    func updatedSearchRepositories(repositories: Array<Repository>){}
     
     // MARK: - ConnectionDelegate
 

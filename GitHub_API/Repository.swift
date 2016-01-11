@@ -10,7 +10,7 @@ import Foundation
 import SwiftyJSON
 
 class Repository{
-    var id: String?
+    var id: Int?
     var name: String?
     var description: String?
     var ownerLogin: String?
@@ -18,7 +18,7 @@ class Repository{
     
     required init(json: JSON) {
         self.description = json["description"].string
-        self.id = json["id"].string
+        self.id = json["id"].int
         self.name = json["name"].string
         self.ownerLogin = json["owner"]["login"].string
         self.url = json["url"].string
