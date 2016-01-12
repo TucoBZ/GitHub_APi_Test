@@ -16,6 +16,7 @@ class DetailViewController: UIViewController {
     // MARK: - Initialization
     override func viewDidLoad() {
         super.viewDidLoad()
+        self.title = repo?.first?.ownerLogin
     }
     
     override func didReceiveMemoryWarning() {
