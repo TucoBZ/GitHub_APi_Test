@@ -77,7 +77,6 @@ class APIConnection{
             break
             
         case "search/users":
-            print(value)
             let items = (value as! Dictionary<String,AnyObject>)["items"]
             for obj in items as! Array<AnyObject>{
                 let json = JSON(obj)
@@ -92,7 +91,6 @@ class APIConnection{
             break
             
         case "search/repositories":
-            print(value)
             let items = (value as! Dictionary<String,AnyObject>)["items"]
             for obj in items as! Array<AnyObject>{
                 let json = JSON(obj)
@@ -106,8 +104,21 @@ class APIConnection{
             }
             break
             
-        default:
+        case "rate_limit":
             print(value)
+            break
+            
+        default:
+            //Call Back from "users/\(name)/repos" like
+            for obj in value as! Array<AnyObject>{
+                let json = JSON(obj)
+                let repo = Repository(json: json)
+                repositories?.append(repo)
+            }
+            if delegate != nil {
+                delegate?.updatedRepositories(repositories!)
+            }
+
             break
         }
     }
@@ -134,6 +145,13 @@ class APIConnection{
     func searchForRepositories(name: String){
         users = []
         updateByKey("search/repositories",param:["q":name])
+    }
+    
+    /**Get Repositories from a user*/
+    func getRepositoriesFromUser(name: String){
+        repositories = []
+        updateByKey("users/\(name)/repos",param:["":""])
+        
     }
     
     /**Get the Rate Limit to use*/

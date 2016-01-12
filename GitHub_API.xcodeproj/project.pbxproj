@@ -19,6 +19,7 @@
 		654A18551C44088A009D2658 /* Repository.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654A18541C44088A009D2658 /* Repository.swift */; };
 		654A18571C440A11009D2658 /* User.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654A18561C440A11009D2658 /* User.swift */; };
 		654A18591C442F39009D2658 /* ExtensionsUTIL.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654A18581C442F39009D2658 /* ExtensionsUTIL.swift */; };
+		654A185F1C451417009D2658 /* DetailViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 654A185E1C451417009D2658 /* DetailViewController.swift */; };
 		D97F7304B7D49B1AC9D2DB96 /* Pods_GitHub_API.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 03E79665334EC2333B30280B /* Pods_GitHub_API.framework */; settings = {ATTRIBUTES = (Weak, ); }; };
 /* End PBXBuildFile section */
 
@@ -60,6 +61,7 @@
 		654A18541C44088A009D2658 /* Repository.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Repository.swift; sourceTree = "<group>"; };
 		654A18561C440A11009D2658 /* User.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = User.swift; sourceTree = "<group>"; };
 		654A18581C442F39009D2658 /* ExtensionsUTIL.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ExtensionsUTIL.swift; sourceTree = "<group>"; };
+		654A185E1C451417009D2658 /* DetailViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = DetailViewController.swift; sourceTree = "<group>"; };
 		9EB71B7D10734DF4A537F7C7 /* Pods-GitHub_API.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-GitHub_API.release.xcconfig"; path = "Pods/Target Support Files/Pods-GitHub_API/Pods-GitHub_API.release.xcconfig"; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -167,6 +169,7 @@
 			children = (
 				654A18231C43D696009D2658 /* UserViewController.swift */,
 				654A18251C43D696009D2658 /* RepositoryViewController.swift */,
+				654A185E1C451417009D2658 /* DetailViewController.swift */,
 			);
 			name = Controller;
 			sourceTree = "<group>";
@@ -377,6 +380,7 @@
 				654A18551C44088A009D2658 /* Repository.swift in Sources */,
 				654A18221C43D696009D2658 /* AppDelegate.swift in Sources */,
 				654A18241C43D696009D2658 /* UserViewController.swift in Sources */,
+				654A185F1C451417009D2658 /* DetailViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

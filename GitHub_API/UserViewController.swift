@@ -33,6 +33,14 @@ final class UserViewController: UIViewController{
         // Dispose of any resources that can be recreated.
     }
 
+    override func prepareForSegue(segue: UIStoryboardSegue, sender: AnyObject!) {
+        if (segue.identifier == "detailSegue") {
+            if let detailViewController: DetailViewController = segue.destinationViewController as? DetailViewController {
+                detailViewController.repo = sender as? Array<Repository>
+            }
+        }
+    }
+    
     func configureSearchController() {
         // Initialize and perform a minimum configuration to the search controller.
         searchController = UISearchController(searchResultsController: nil)
@@ -54,7 +62,21 @@ final class UserViewController: UIViewController{
 // MARK: - UITableViewDelegate
 extension UserViewController: UITableViewDelegate {
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {}
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
+        if shouldShowSearchResults {
+            if searchController.active {
+                searchController.searchBar.resignFirstResponder()
+                searchController.active = false
+            }
+            if let name = filteredArray?[indexPath.row].login{
+                connection?.getRepositoriesFromUser(name)
+            }
+        }else{
+            if let name = users?[indexPath.row].login{
+                connection?.getRepositoriesFromUser(name)
+            }
+        }
+    }
 }
 
 // MARK: - UITableViewDataSource
@@ -142,6 +164,9 @@ extension UserViewController: ConnectionDelegate {
         tableView?.reloadData()
     }
     
-    func updatedRepositories(repositories: Array<Repository>) {}
+    func updatedRepositories(repositories: Array<Repository>) {
+        performSegueWithIdentifier("detailSegue", sender: repositories)
+    }
+    
     func updatedSearchRepositories(repositories: Array<Repository>){}
 }
