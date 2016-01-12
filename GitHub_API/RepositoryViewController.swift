@@ -9,64 +9,36 @@
 import UIKit
 import PINRemoteImage
 
-class RepositoryViewController: UIViewController, ConnectionDelegate, UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating, UISearchBarDelegate{
+final class RepositoryViewController: UIViewController {
     
     // MARK: - Variables
-    
     var repo : Array<Repository>?
     var filteredArray : Array<Repository>?
-    
     var connection = APIConnection.init()
     var searchController : UISearchController!
     var shouldShowSearchResults = false
-    
     @IBOutlet var tableView: UITableView!
     
-    // MARK: - TableViewDelegate and DataSource
-    
-    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
-        if shouldShowSearchResults {
-            return filteredArray!.count
-        }
-        return repo!.count
+    // MARK: - Initialization
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        repo = []
+        filteredArray = []
+        configureSearchController()
+        configureConnection()
     }
     
-    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
-        
-        let cell:UITableViewCell = tableView.dequeueReusableCellWithIdentifier("cell")! as UITableViewCell
-        
-        if shouldShowSearchResults {
-            
-            //User Name
-            cell.textLabel?.text = "\(self.filteredArray![indexPath.row].name!)"
-            cell.detailTextLabel?.text = self.filteredArray![indexPath.row].description!
-            
-            //Image
-            cell.imageView?.image =  UIImage(named: "githubPlaceHolder")
-            
-            return cell
-            
-        }
-        
-        //User Name
-        cell.textLabel?.text = "\(self.repo![indexPath.row].name!) - ID: \(self.repo![indexPath.row].id!)"
-        cell.detailTextLabel?.text = self.repo![indexPath.row].description!
-        
-        //Image
-        cell.imageView?.image =  UIImage(named: "githubPlaceHolder")
-        
-        if self.repo!.count-1 == indexPath.row{
-            self.connection.getRepositories(self.repo![indexPath.row].id!)
-        }
-        
-        return cell
-        
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
     }
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        
+    func configureConnection(){
+        self.connection.view = self.view
+        self.connection.delegate = self
+        self.connection.getRepositories(0)
+        self.connection.getRateLimit()
     }
-    // MARK: - UISearchResultsUpdating, Delegate and Congiguration
     
     func configureSearchController() {
         // Initialize and perform a minimum configuration to the search controller.
@@ -76,16 +48,74 @@ class RepositoryViewController: UIViewController, ConnectionDelegate, UITableVie
         searchController.searchBar.placeholder = "Search here..."
         searchController.searchBar.delegate = self
         searchController.searchBar.sizeToFit()
-        
         // Place the search bar view to the tableview headerview.
         tableView.tableHeaderView = searchController.searchBar
     }
+    
+}
+
+// MARK: - UITableViewDelegate
+extension RepositoryViewController: UITableViewDelegate {
+    
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {}
+}
+
+// MARK: - UITableViewDataSource
+extension RepositoryViewController: UITableViewDataSource {
+    
+    func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
+        if shouldShowSearchResults {
+            return filteredArray!.count
+        }
+        return repo!.count
+    }
+
+    func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        var cell = UITableViewCell()
+        
+        if let reuseblecell = tableView.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath) as? UITableViewCell {
+            if shouldShowSearchResults {
+                //Repository Name and Description
+                if let name = filteredArray?[indexPath.row].name{
+                    reuseblecell.textLabel?.text = name
+                }
+                if let description = filteredArray?[indexPath.row].description {
+                    reuseblecell.detailTextLabel?.text = description
+                }
+            } else {
+                //Repository Name and Description
+                if let description = repo?[indexPath.row].description{
+                    reuseblecell.detailTextLabel?.text = description
+                }
+                if let name = repo?[indexPath.row].name,let id = repo?[indexPath.row].id{
+                        reuseblecell.textLabel?.text = "\(name) - ID: \(id)"
+                        if self.repo!.count-1 == indexPath.row{
+                            self.connection.getRepositories(id)
+                        }
+                }
+            }
+            //Image
+            reuseblecell.imageView?.image =  UIImage(named: "githubPlaceHolder")
+            cell = reuseblecell
+        }
+        return cell
+    }
+}
+
+// MARK: - UISearchBarDelegate
+extension RepositoryViewController: UISearchBarDelegate {
+
+    func updateSearchResultsForSearchController(searchController: UISearchController) {}
+
+}
+
+// MARK: - UISearchResultsUpdating
+extension RepositoryViewController: UISearchResultsUpdating {
     
     func searchBarTextDidBeginEditing(searchBar: UISearchBar) {
         shouldShowSearchResults = false
         self.filteredArray = []
     }
-    
     
     func searchBarCancelButtonClicked(searchBar: UISearchBar) {
         shouldShowSearchResults = false
@@ -96,54 +126,25 @@ class RepositoryViewController: UIViewController, ConnectionDelegate, UITableVie
     func searchBarSearchButtonClicked(searchBar: UISearchBar) {
         if !shouldShowSearchResults {
             shouldShowSearchResults = true
-            //tableView.reloadData()
             self.connection.searchForRepositories(searchBar.text!)
         }
-        
         searchController.searchBar.resignFirstResponder()
     }
-    
-    func updateSearchResultsForSearchController(searchController: UISearchController) {
-        
-        
-    }
-    
-    // MARK: - ConnectionDelegate
+}
+
+// MARK: - ConnectionDelegate
+extension RepositoryViewController: ConnectionDelegate {
     
     func updatedUsers(users: Array<User>) {}
+    func updatedSearchUsers(users: Array<User>) {}
     
     func updatedRepositories(repositories: Array<Repository>) {
         self.repo?.appendAll(repositories)
         self.tableView?.reloadData()
     }
     
-    func updatedSearchUsers(users: Array<User>) {}
-    
     func updatedSearchRepositories(repositories: Array<Repository>){
-            self.filteredArray = repositories
-            self.tableView?.reloadData()
-    }
-    
-    // MARK: - ConnectionDelegate
-    
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        repo = []
-        filteredArray = []
-        configureSearchController()
-        
-        self.connection.view = self.view
-        self.connection.delegate = self
-        
-        //self.connection.logintest("login", pass: "password")
-        self.connection.getRepositories(0)
-        self.connection.getRateLimit()
-    }
-    
-    
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
+        self.filteredArray = repositories
+        self.tableView?.reloadData()
     }
 }

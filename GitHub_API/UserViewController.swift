@@ -9,20 +9,58 @@
 import UIKit
 import PINRemoteImage
 
-class UserViewController: UIViewController, ConnectionDelegate, UITableViewDelegate, UITableViewDataSource, UISearchResultsUpdating, UISearchBarDelegate{
+final class UserViewController: UIViewController{
     
     // MARK: - Variables
-    
     var users : Array<User>?
     var filteredArray : Array<User>?
-    
     var connection = APIConnection.init()
     var searchController : UISearchController!
     var shouldShowSearchResults = false
-    
     @IBOutlet var tableView: UITableView!
     
-    // MARK: - TableViewDelegate and DataSource
+    // MARK: - Initialization
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        users = []
+        filteredArray = []
+        configureSearchController()
+        configureConnection()
+    }
+    
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        // Dispose of any resources that can be recreated.
+    }
+
+    func configureSearchController() {
+        // Initialize and perform a minimum configuration to the search controller.
+        searchController = UISearchController(searchResultsController: nil)
+        searchController.searchResultsUpdater = self
+        searchController.dimsBackgroundDuringPresentation = false
+        searchController.searchBar.placeholder = "Search here..."
+        searchController.searchBar.delegate = self
+        searchController.searchBar.sizeToFit()
+        // Place the search bar view to the tableview headerview.
+        tableView.tableHeaderView = searchController.searchBar
+    }
+    
+    func configureConnection(){
+        self.connection.view = self.view
+        self.connection.delegate = self
+        self.connection.getUsers(0)
+        self.connection.getRateLimit()
+    }
+}
+
+// MARK: - UITableViewDelegate
+extension UserViewController: UITableViewDelegate {
+    
+    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {}
+}
+
+// MARK: - UITableViewDataSource
+extension UserViewController: UITableViewDataSource {
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if shouldShowSearchResults {
@@ -32,59 +70,51 @@ class UserViewController: UIViewController, ConnectionDelegate, UITableViewDeleg
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
+        var cell = UITableViewCell()
         
-        let cell:UITableViewCell = tableView.dequeueReusableCellWithIdentifier("cell")! as UITableViewCell
-        
-        if shouldShowSearchResults {
-            
-            //User Name
-            cell.textLabel?.text = "\(self.filteredArray![indexPath.row].login!)"
-            
-            //Image Pin
-            let imageURL = NSURL(string: self.filteredArray![indexPath.row].avatar_url!)
-            cell.imageView?.pin_setImageFromURL(imageURL, placeholderImage: UIImage(named: "githubPlaceHolder"))
-            
-            return cell
-
+        if let reuseblecell = tableView.dequeueReusableCellWithIdentifier("cell", forIndexPath: indexPath) as? UITableViewCell {
+            if shouldShowSearchResults {
+                //User Name
+                if let name = filteredArray?[indexPath.row].login{
+                    reuseblecell.textLabel?.text = name
+                }
+                //Image
+                if let imageURL = self.filteredArray?[indexPath.row].avatar_url{
+                    reuseblecell.imageView?.pin_setImageFromURL(NSURL(string:imageURL), placeholderImage: UIImage(named: "githubPlaceHolder"))
+                }
+            } else {
+                //User Name
+                if let name = users?[indexPath.row].login, let id = users?[indexPath.row].id{
+                    reuseblecell.textLabel?.text = "\(name) - ID: \(id)"
+                    if self.users!.count-1 == indexPath.row{
+                        self.connection.getUsers(id)
+                    }
+                }
+                //Image
+                if let imageURL = self.users?[indexPath.row].avatar_url{
+                    reuseblecell.imageView?.pin_setImageFromURL(NSURL(string:imageURL), placeholderImage: UIImage(named: "githubPlaceHolder"))
+                }
+            }
+            cell = reuseblecell
         }
-        //User Name
-        cell.textLabel?.text = "\(self.users![indexPath.row].login!) - ID: \(self.users![indexPath.row].id!)"
-        
-        //Image Pin
-        let imageURL = NSURL(string: self.users![indexPath.row].avatar_url!)
-        cell.imageView?.pin_setImageFromURL(imageURL, placeholderImage: UIImage(named: "githubPlaceHolder"))
-        
-        if self.users!.count-1 == indexPath.row{
-            self.connection.getUsers(self.users![indexPath.row].id!)
-        }
-        
         return cell
-        
     }
+}
+
+// MARK: - UISearchBarDelegate
+extension UserViewController: UISearchBarDelegate {
     
-    func tableView(tableView: UITableView, didSelectRowAtIndexPath indexPath: NSIndexPath) {
-        
-    }
-    // MARK: - UISearchResultsUpdating, Delegate and Congiguration
+    func updateSearchResultsForSearchController(searchController: UISearchController) {}
     
-    func configureSearchController() {
-        // Initialize and perform a minimum configuration to the search controller.
-        searchController = UISearchController(searchResultsController: nil)
-        searchController.searchResultsUpdater = self
-        searchController.dimsBackgroundDuringPresentation = false
-        searchController.searchBar.placeholder = "Search here..."
-        searchController.searchBar.delegate = self
-        searchController.searchBar.sizeToFit()
-        
-        // Place the search bar view to the tableview headerview.
-        tableView.tableHeaderView = searchController.searchBar
-    }
+}
+
+// MARK: - UISearchResultsUpdating
+extension UserViewController: UISearchResultsUpdating {
     
     func searchBarTextDidBeginEditing(searchBar: UISearchBar) {
         shouldShowSearchResults = false
         self.filteredArray = []
     }
-    
     
     func searchBarCancelButtonClicked(searchBar: UISearchBar) {
         shouldShowSearchResults = false
@@ -95,57 +125,25 @@ class UserViewController: UIViewController, ConnectionDelegate, UITableViewDeleg
     func searchBarSearchButtonClicked(searchBar: UISearchBar) {
         if !shouldShowSearchResults {
             shouldShowSearchResults = true
-            //tableView.reloadData()
             self.connection.searchForUser(searchBar.text!)
         }
-        
         searchController.searchBar.resignFirstResponder()
     }
-    
-    func updateSearchResultsForSearchController(searchController: UISearchController) {
-       
-        
-    }
-    
-    // MARK: - ConnectionDelegate
+}
+
+// MARK: - ConnectionDelegate
+extension UserViewController: ConnectionDelegate {
     
     func updatedUsers(users: Array<User>) {
         self.users?.appendAll(users)
         self.tableView?.reloadData()
     }
     
-    func updatedRepositories(repositories: Array<Repository>) {}
-
     func updatedSearchUsers(users: Array<User>) {
         self.filteredArray = users
         self.tableView?.reloadData()
     }
     
+    func updatedRepositories(repositories: Array<Repository>) {}
     func updatedSearchRepositories(repositories: Array<Repository>){}
-    
-    // MARK: - ConnectionDelegate
-
-    override func viewDidLoad() {
-        super.viewDidLoad()
-        
-        users = []
-        filteredArray = []
-        configureSearchController()
-        
-        self.connection.view = self.view
-        self.connection.delegate = self
-
-        //self.connection.logintest("login", pass: "password")
-        self.connection.getUsers(0)
-        self.connection.getRateLimit()
-    }
-    
-
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        // Dispose of any resources that can be recreated.
-    }
-
-   
 }
-
