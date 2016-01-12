@@ -14,7 +14,7 @@ final class RepositoryViewController: UIViewController {
     // MARK: - Variables
     var repo : Array<Repository>?
     var filteredArray : Array<Repository>?
-    var connection = APIConnection.init()
+    var connection : APIConnection?
     var searchController : UISearchController!
     var shouldShowSearchResults = false
     @IBOutlet var tableView: UITableView!
@@ -34,10 +34,8 @@ final class RepositoryViewController: UIViewController {
     }
     
     func configureConnection(){
-        self.connection.view = self.view
-        self.connection.delegate = self
-        self.connection.getRepositories(0)
-        self.connection.getRateLimit()
+        connection = APIConnection.init(connectionDelegate: self, currentView: self.view)
+        connection?.getRepositories(0)
     }
     
     func configureSearchController() {
@@ -65,9 +63,9 @@ extension RepositoryViewController: UITableViewDataSource {
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if shouldShowSearchResults {
-            return filteredArray!.count
+            return filteredArray?.count ?? 0
         }
-        return repo!.count
+        return repo?.count ?? 0
     }
 
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -89,8 +87,8 @@ extension RepositoryViewController: UITableViewDataSource {
                 }
                 if let name = repo?[indexPath.row].name,let id = repo?[indexPath.row].id{
                         reuseblecell.textLabel?.text = "\(name) - ID: \(id)"
-                        if self.repo!.count-1 == indexPath.row{
-                            self.connection.getRepositories(id)
+                        if repo!.count-1 == indexPath.row{
+                            connection?.getRepositories(id)
                         }
                 }
             }
@@ -114,19 +112,19 @@ extension RepositoryViewController: UISearchResultsUpdating {
     
     func searchBarTextDidBeginEditing(searchBar: UISearchBar) {
         shouldShowSearchResults = false
-        self.filteredArray = []
+        filteredArray = []
     }
     
     func searchBarCancelButtonClicked(searchBar: UISearchBar) {
         shouldShowSearchResults = false
-        self.filteredArray = []
+        filteredArray = []
         tableView.reloadData()
     }
     
     func searchBarSearchButtonClicked(searchBar: UISearchBar) {
         if !shouldShowSearchResults {
             shouldShowSearchResults = true
-            self.connection.searchForRepositories(searchBar.text!)
+            connection?.searchForRepositories(searchBar.text!)
         }
         searchController.searchBar.resignFirstResponder()
     }
@@ -139,12 +137,12 @@ extension RepositoryViewController: ConnectionDelegate {
     func updatedSearchUsers(users: Array<User>) {}
     
     func updatedRepositories(repositories: Array<Repository>) {
-        self.repo?.appendAll(repositories)
-        self.tableView?.reloadData()
+        repo?.appendAll(repositories)
+        tableView?.reloadData()
     }
     
     func updatedSearchRepositories(repositories: Array<Repository>){
-        self.filteredArray = repositories
-        self.tableView?.reloadData()
+        filteredArray = repositories
+        tableView?.reloadData()
     }
 }

@@ -14,7 +14,7 @@ final class UserViewController: UIViewController{
     // MARK: - Variables
     var users : Array<User>?
     var filteredArray : Array<User>?
-    var connection = APIConnection.init()
+    var connection : APIConnection?
     var searchController : UISearchController!
     var shouldShowSearchResults = false
     @IBOutlet var tableView: UITableView!
@@ -46,10 +46,8 @@ final class UserViewController: UIViewController{
     }
     
     func configureConnection(){
-        self.connection.view = self.view
-        self.connection.delegate = self
-        self.connection.getUsers(0)
-        self.connection.getRateLimit()
+        connection = APIConnection.init(connectionDelegate: self, currentView: self.view)
+        connection?.getUsers(0)
     }
 }
 
@@ -64,9 +62,9 @@ extension UserViewController: UITableViewDataSource {
     
     func tableView(tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         if shouldShowSearchResults {
-            return filteredArray!.count
+            return filteredArray?.count ?? 0
         }
-        return users!.count
+        return users?.count ?? 0
     }
     
     func tableView(tableView: UITableView, cellForRowAtIndexPath indexPath: NSIndexPath) -> UITableViewCell {
@@ -79,19 +77,19 @@ extension UserViewController: UITableViewDataSource {
                     reuseblecell.textLabel?.text = name
                 }
                 //Image
-                if let imageURL = self.filteredArray?[indexPath.row].avatar_url{
+                if let imageURL = filteredArray?[indexPath.row].avatar_url{
                     reuseblecell.imageView?.pin_setImageFromURL(NSURL(string:imageURL), placeholderImage: UIImage(named: "githubPlaceHolder"))
                 }
             } else {
                 //User Name
                 if let name = users?[indexPath.row].login, let id = users?[indexPath.row].id{
                     reuseblecell.textLabel?.text = "\(name) - ID: \(id)"
-                    if self.users!.count-1 == indexPath.row{
-                        self.connection.getUsers(id)
+                    if users!.count-1 == indexPath.row{
+                        connection?.getUsers(id)
                     }
                 }
                 //Image
-                if let imageURL = self.users?[indexPath.row].avatar_url{
+                if let imageURL = users?[indexPath.row].avatar_url{
                     reuseblecell.imageView?.pin_setImageFromURL(NSURL(string:imageURL), placeholderImage: UIImage(named: "githubPlaceHolder"))
                 }
             }
@@ -113,19 +111,19 @@ extension UserViewController: UISearchResultsUpdating {
     
     func searchBarTextDidBeginEditing(searchBar: UISearchBar) {
         shouldShowSearchResults = false
-        self.filteredArray = []
+        filteredArray = []
     }
     
     func searchBarCancelButtonClicked(searchBar: UISearchBar) {
         shouldShowSearchResults = false
-        self.filteredArray = []
+        filteredArray = []
         tableView.reloadData()
     }
     
     func searchBarSearchButtonClicked(searchBar: UISearchBar) {
         if !shouldShowSearchResults {
             shouldShowSearchResults = true
-            self.connection.searchForUser(searchBar.text!)
+            connection?.searchForUser(searchBar.text!)
         }
         searchController.searchBar.resignFirstResponder()
     }
@@ -136,12 +134,12 @@ extension UserViewController: ConnectionDelegate {
     
     func updatedUsers(users: Array<User>) {
         self.users?.appendAll(users)
-        self.tableView?.reloadData()
+        tableView?.reloadData()
     }
     
     func updatedSearchUsers(users: Array<User>) {
-        self.filteredArray = users
-        self.tableView?.reloadData()
+        filteredArray = users
+        tableView?.reloadData()
     }
     
     func updatedRepositories(repositories: Array<Repository>) {}
